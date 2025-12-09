@@ -3,6 +3,17 @@
 .AppleDouble
 .LSOverride
 
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
+yarn.lock
+.npm
+.yarn
+
 # Python
 __pycache__/
 *.py[cod]
