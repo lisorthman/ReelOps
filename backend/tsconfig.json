@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    // Compile modern JS but compatible with Node
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+
+    // Where TS source lives / where JS output goes
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // Allow `import express from 'express'`
+    "esModuleInterop": true,
+
+    // Type checking
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    // Important: allow ESM-style imports in CommonJS output
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
