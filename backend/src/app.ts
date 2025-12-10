@@ -12,7 +12,6 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use('/api/projects', projectsRoutes);
 
 app.get('/health', async (_req, res) => {
   try {
@@ -33,6 +32,7 @@ app.get('/health', async (_req, res) => {
 
 // Mount auth routes
 app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectsRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
