@@ -28,25 +28,53 @@ function isValidStatus(status: any): status is ProjectStatus {
 router.get(
   '/',
   authenticate,
-  async (_req: AuthRequest, res: Response) => {
+  async (req: AuthRequest, res: Response) => {
     try {
-      const result = await pool.query(
-        `SELECT
-          p.id,
-          p.title,
-          p.description,
-          p.status,
-          p.start_date,
-          p.end_date,
-          p.budget_total,
-          p.created_at,
-          u.name AS created_by_name,
-          u.id AS created_by_id
-        FROM projects p
-        LEFT JOIN users u ON p.created_by = u.id
-        ORDER BY p.created_at DESC`
-      );
+      const user = req.user!;
+      let query = '';
+      let params: any[] = [];
 
+      if (user.role === 'producer') {
+        // ✅ Producer: only their own projects
+        query = `
+          SELECT
+            p.id,
+            p.title,
+            p.description,
+            p.status,
+            p.start_date,
+            p.end_date,
+            p.budget_total,
+            p.created_at,
+            u.name AS created_by_name,
+            u.id AS created_by_id
+          FROM projects p
+          LEFT JOIN users u ON p.created_by = u.id
+          WHERE p.created_by = $1
+          ORDER BY p.created_at DESC
+        `;
+        params = [user.userId];
+      } else {
+        // ✅ Admin (and maybe crew): can see all projects
+        query = `
+          SELECT
+            p.id,
+            p.title,
+            p.description,
+            p.status,
+            p.start_date,
+            p.end_date,
+            p.budget_total,
+            p.created_at,
+            u.name AS created_by_name,
+            u.id AS created_by_id
+          FROM projects p
+          LEFT JOIN users u ON p.created_by = u.id
+          ORDER BY p.created_at DESC
+        `;
+      }
+
+      const result = await pool.query(query, params);
       res.json(result.rows);
     } catch (err) {
       console.error('Error fetching projects:', err);
@@ -54,6 +82,7 @@ router.get(
     }
   }
 );
+
 
 /**
  * GET /api/projects/:id
@@ -66,6 +95,7 @@ router.get(
   async (req: AuthRequest, res: Response) => {
     try {
       const { id } = req.params;
+      const user = req.user!;
 
       const result = await pool.query(
         `SELECT
@@ -77,6 +107,7 @@ router.get(
           p.end_date,
           p.budget_total,
           p.created_at,
+          p.created_by,
           u.name AS created_by_name,
           u.id AS created_by_id
         FROM projects p
@@ -89,7 +120,14 @@ router.get(
         return res.status(404).json({ message: 'Project not found' });
       }
 
-      res.json(result.rows[0]);
+      const project = result.rows[0];
+
+      // ✅ If producer, only allow own project
+      if (user.role === 'producer' && project.created_by !== user.userId) {
+        return res.status(403).json({ message: 'You are not allowed to view this project' });
+      }
+
+      res.json(project);
     } catch (err) {
       console.error('Error fetching project:', err);
       res.status(500).json({ message: 'Internal server error' });
