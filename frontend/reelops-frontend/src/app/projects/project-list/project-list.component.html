@@ -1,0 +1,42 @@
+<div class="page">
+  <div class="page-header">
+    <h2>Projects</h2>
+    <button (click)="goToNewProject()">+ New Project</button>
+  </div>
+
+  <div *ngIf="loading">Loading projects...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- Debug output -->
+  <pre *ngIf="!loading">
+Projects array (debug):
+{{ projects | json }}
+  </pre>
+
+  <table *ngIf="!loading && projects.length > 0">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Budget</th>
+        <th>Created By</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of projects" (click)="goToDetail(p.id)">
+        <td>{{ p.title }}</td>
+        <td>{{ p.status }}</td>
+        <td>{{ p.start_date || '-' }}</td>
+        <td>{{ p.end_date || '-' }}</td>
+        <td>{{ p.budget_total || '-' }}</td>
+        <td>{{ p.created_by_name || '-' }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && projects.length === 0 && !error">
+    No projects yet. Create your first one!
+  </div>
+</div>

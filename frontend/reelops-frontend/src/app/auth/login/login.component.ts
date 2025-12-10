@@ -33,7 +33,7 @@ export class LoginComponent {
       next: () => {
         this.loading = false;
         // Navigate to some dashboard later, for now just home
-        this.router.navigateByUrl('/');
+         this.router.navigate(['/projects']);
       },
       error: (err) => {
         this.loading = false;
