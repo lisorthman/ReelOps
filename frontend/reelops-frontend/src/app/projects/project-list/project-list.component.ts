@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { ProjectsService } from '../projects.service';
@@ -18,12 +19,18 @@ export class ProjectListComponent implements OnInit {
 
   constructor(
     private projectsService: ProjectsService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) { }
 
   ngOnInit(): void {
     console.log('✅ ProjectListComponent init');
-    this.fetchProjects();
+
+    // Only fetch on browser, not during SSR
+    if (isPlatformBrowser(this.platformId)) {
+      this.fetchProjects();
+    }
   }
 
   fetchProjects() {
@@ -37,11 +44,13 @@ export class ProjectListComponent implements OnInit {
         // Handle case where backend might return null or non-array
         this.projects = Array.isArray(projects) ? projects : [];
         this.loading = false;
+        this.cdr.detectChanges(); // Manually trigger change detection
       },
       error: (err) => {
         console.error('❌ Error from getProjects:', err);
         this.error = err.error?.message || 'Failed to load projects';
         this.loading = false;
+        this.cdr.detectChanges(); // Manually trigger change detection
       },
     });
   }

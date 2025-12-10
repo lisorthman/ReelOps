@@ -7,12 +7,6 @@
   <div *ngIf="loading">Loading projects...</div>
   <div *ngIf="error" class="error">{{ error }}</div>
 
-  <!-- Debug output -->
-  <pre *ngIf="!loading">
-Projects array (debug):
-{{ projects | json }}
-  </pre>
-
   <table *ngIf="!loading && projects.length > 0">
     <thead>
       <tr>
