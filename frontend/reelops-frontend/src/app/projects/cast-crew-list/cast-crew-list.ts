@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CastCrewService, CastCrewMember } from '../../services/cast-crew';
@@ -11,7 +11,7 @@ import { AuthService } from '../../auth/auth.service';
   templateUrl: './cast-crew-list.html',
   styleUrl: './cast-crew-list.scss',
 })
-export class CastCrewList implements OnInit {
+export class CastCrewList implements OnInit, OnChanges {
   @Input() projectId!: number;
 
   members: CastCrewMember[] = [];
@@ -39,8 +39,21 @@ export class CastCrewList implements OnInit {
 
   ngOnInit() {
     this.currentUserRole = this.authService.getCurrentUser()?.role || '';
+    // Load members if projectId is already set (fallback if ngOnChanges didn't fire)
     if (this.projectId && this.isBrowser) {
       this.loadMembers();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    // Load members when projectId is set or changes
+    if (changes['projectId'] && this.projectId && this.isBrowser) {
+      // If it's the first change and we have a projectId, load members
+      // Also reload if projectId actually changed
+      if (changes['projectId'].firstChange || 
+          (changes['projectId'].previousValue !== changes['projectId'].currentValue)) {
+        this.loadMembers();
+      }
     }
   }
 
@@ -53,7 +66,7 @@ export class CastCrewList implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load members', err);
-        this.error = 'Could not load team members.';
+        this.error = 'Could not load cast/crew.';
         this.isLoading = false;
       }
     });

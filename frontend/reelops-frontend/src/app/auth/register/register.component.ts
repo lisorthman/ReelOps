@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
@@ -41,7 +41,7 @@ export class RegisterComponent {
       .subscribe({
         next: () => {
           this.loading = false;
-          this.router.navigateByUrl('/');
+          this.router.navigate(['/projects']);
         },
         error: (err) => {
           this.loading = false;

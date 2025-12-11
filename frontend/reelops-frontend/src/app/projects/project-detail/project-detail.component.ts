@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectsService } from '../projects.service';
 import { Project, ProjectStatus } from '../../shared/models/project.model';
 import { CastCrewList } from '../cast-crew-list/cast-crew-list';
@@ -9,7 +9,7 @@ import { CastCrewList } from '../cast-crew-list/cast-crew-list';
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, CastCrewList],
+  imports: [CommonModule, FormsModule, CastCrewList, RouterLink],
   templateUrl: './project-detail.component.html',
   styleUrl: './project-detail.component.scss',
 })
@@ -27,6 +27,7 @@ export class ProjectDetailComponent implements OnInit {
   saving = false;
   error: string | null = null;
   isEditMode = false;
+  isEditing = false; // Toggle between view and edit mode
   isBrowser: boolean;
 
   statuses: ProjectStatus[] = [
@@ -77,6 +78,25 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
+  formatDate(dateString: string | undefined): string {
+    if (!dateString) return 'TBD';
+    // Extract just the date part (YYYY-MM-DD) if it includes time
+    const dateOnly = dateString.split('T')[0];
+    return dateOnly;
+  }
+
+  goBack() {
+    if (this.isEditMode) {
+      this.isEditing = false;
+      // Reload project to reset any unsaved changes
+      if (this.projectId) {
+        this.loadProject(this.projectId);
+      }
+    } else {
+      this.router.navigate(['/projects']);
+    }
+  }
+
   onSubmit() {
     this.error = null;
     this.saving = true;
@@ -93,7 +113,9 @@ export class ProjectDetailComponent implements OnInit {
         .subscribe({
           next: () => {
             this.saving = false;
-            this.router.navigate(['/projects']);
+            this.isEditing = false;
+            // Reload project to show updated data
+            this.loadProject(this.projectId!);
           },
           error: (err) => {
             console.error(err);
@@ -103,9 +125,14 @@ export class ProjectDetailComponent implements OnInit {
         });
     } else {
       this.projectsService.createProject(this.project).subscribe({
-        next: () => {
+        next: (newProject) => {
           this.saving = false;
-          this.router.navigate(['/projects']);
+          // Navigate to the new project's detail page
+          if (newProject.id) {
+            this.router.navigate(['/projects', newProject.id]);
+          } else {
+            this.router.navigate(['/projects']);
+          }
         },
         error: (err) => {
           console.error(err);

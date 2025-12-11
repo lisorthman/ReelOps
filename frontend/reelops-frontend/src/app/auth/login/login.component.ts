@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -17,7 +17,11 @@ export class LoginComponent {
   loading = false;
   error: string | null = null;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   onSubmit() {
     this.error = null;
@@ -32,8 +36,9 @@ export class LoginComponent {
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: () => {
         this.loading = false;
-        // Navigate to some dashboard later, for now just home
-         this.router.navigate(['/projects']);
+        // Check for returnUrl query parameter, otherwise go to projects
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/projects';
+        this.router.navigate([returnUrl]);
       },
       error: (err) => {
         this.loading = false;

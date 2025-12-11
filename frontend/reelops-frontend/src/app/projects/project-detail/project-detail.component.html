@@ -1,55 +1,129 @@
-<div class="page">
-  <h2>{{ isEditMode ? 'Edit Project' : 'New Project' }}</h2>
-
-  <div *ngIf="loading">Loading project...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
-
-  <form (ngSubmit)="onSubmit()" *ngIf="!loading">
-    <div class="form-group">
-      <label>Title</label>
-      <input type="text" [(ngModel)]="project.title" name="title" required placeholder="Project title" />
+<div class="project-detail-wrapper">
+  <div class="dashboard-container">
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div> Loading project...
     </div>
+    <div *ngIf="error" class="error-msg">{{ error }}</div>
 
-    <div class="form-group">
-      <label>Description</label>
-      <textarea [(ngModel)]="project.description" name="description" rows="3"
-        placeholder="Brief description"></textarea>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label>Status</label>
-        <select [(ngModel)]="project.status" name="status" required>
-          <option *ngFor="let s of statuses" [value]="s">
-            {{ s }}
-          </option>
-        </select>
+    <!-- View Mode -->
+    <div *ngIf="!loading && !isEditing && isEditMode">
+    <!-- Hero Header -->
+    <div class="project-header">
+      <div class="header-content">
+        <div class="status-badge" [class]="project.status">{{ project.status }}</div>
+        <h1 class="title-display">{{ project.title }}</h1>
+        <div class="header-meta">
+          <span>Started {{ formatDate(project.start_date) }}</span>
+          <span class="divider" *ngIf="project.end_date">•</span>
+          <span *ngIf="project.end_date">Ends {{ formatDate(project.end_date) }}</span>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label>Budget (total)</label>
-        <input type="number" [(ngModel)]="project.budget_total" name="budget_total" min="0" />
+      <div class="header-actions">
+        <button type="button" routerLink="/projects" class="btn btn-outline">Back</button>
+        <button type="button" (click)="isEditing = true" class="btn btn-primary">Edit Project</button>
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label>Start date</label>
-        <input type="date" [(ngModel)]="project.start_date" name="start_date" />
-      </div>
+    <!-- Project Description -->
+    <div class="card detail-card" *ngIf="project.description">
+      <h3>Description</h3>
+      <p class="description-text">{{ project.description }}</p>
+    </div>
 
-      <div class="form-group">
-        <label>End date</label>
-        <input type="date" [(ngModel)]="project.end_date" name="end_date" />
+    <!-- Project Details -->
+    <div class="card detail-card">
+      <h3>Project Details</h3>
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="detail-label">Status</span>
+          <span class="detail-value">{{ project.status | titlecase }}</span>
+        </div>
+        <div class="detail-item" *ngIf="project.budget_total">
+          <span class="detail-label">Total Budget</span>
+          <span class="detail-value">${{ project.budget_total | number }}</span>
+        </div>
+        <div class="detail-item" *ngIf="project.start_date">
+          <span class="detail-label">Production Start</span>
+          <span class="detail-value">{{ formatDate(project.start_date) }}</span>
+        </div>
+        <div class="detail-item" *ngIf="project.end_date">
+          <span class="detail-label">Production End</span>
+          <span class="detail-value">{{ formatDate(project.end_date) }}</span>
+        </div>
       </div>
     </div>
 
-    <!-- Cast & Crew Section (Only in Edit Mode) -->
-    <app-cast-crew-list *ngIf="projectId" [projectId]="projectId"></app-cast-crew-list>
+      <!-- Cast & Crew Section -->
+      <div class="team-section" *ngIf="projectId">
+        <app-cast-crew-list [projectId]="projectId"></app-cast-crew-list>
+      </div>
+    </div>
 
+    <!-- Edit Mode -->
+    <form (ngSubmit)="onSubmit()" *ngIf="!loading && (isEditing || !isEditMode)">
+    <!-- Hero Header -->
+    <div class="project-header">
+      <div class="header-content">
+        <div class="status-badge" [class]="project.status">{{ project.status }}</div>
+        <input type="text" [(ngModel)]="project.title" name="title" class="title-input" placeholder="Project Title" />
+        <div class="header-meta">
+          <span>Started {{ project.start_date || 'TBD' }}</span>
+          <span class="divider">•</span>
+          <span>{{ isEditMode ? 'Editing' : 'Creating New Project' }}</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" (click)="isEditing = false; goBack()" class="btn btn-outline">Cancel</button>
+        <button type="submit" [disabled]="saving" class="btn btn-primary">
+          {{ saving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </div>
 
-    <button type="submit" [disabled]="saving">
-      {{ saving ? 'Saving...' : (isEditMode ? 'Update Project' : 'Create Project') }}
-    </button>
-  </form>
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid">
+      <div class="main-column">
+        <!-- Cast & Crew Section - Show First When Editing -->
+        <div class="team-section" *ngIf="projectId">
+          <app-cast-crew-list [projectId]="projectId"></app-cast-crew-list>
+        </div>
+
+        <!-- Project Details Form -->
+        <div class="card detail-card">
+          <h3>Project Details</h3>
+
+          <div class="form-group full">
+            <label>Description</label>
+            <textarea [(ngModel)]="project.description" name="description" rows="3"
+              placeholder="Project logline or summary..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Status</label>
+              <select [(ngModel)]="project.status" name="status">
+                <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Total Budget</label>
+              <input type="number" [(ngModel)]="project.budget_total" name="budget_total" placeholder="$0.00" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Production Start</label>
+              <input type="date" [(ngModel)]="project.start_date" name="start_date" />
+            </div>
+            <div class="form-group">
+              <label>Production End</label>
+              <input type="date" [(ngModel)]="project.end_date" name="end_date" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </form>
+  </div>
 </div>

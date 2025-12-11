@@ -1,1 +1,31 @@
-<router-outlet></router-outlet>
+<div class="app-layout">
+    <!-- Sidebar (Only visible when logged in AND not on auth pages) -->
+    <aside class="sidebar" *ngIf="showSidebar">
+        <div class="logo">
+            Reel<span class="highlight">Ops</span>
+        </div>
+
+        <nav class="nav-links">
+            <a routerLink="/projects" routerLinkActive="active" class="nav-item">
+                Projects
+            </a>
+            <!-- Add more links as needed -->
+        </nav>
+
+        <div class="user-profile">
+            <div class="user-info">
+                <div class="avatar">{{ authService.getCurrentUser()?.name?.charAt(0) || 'U' }}</div>
+                <div class="details">
+                    <span class="name">{{ authService.getCurrentUser()?.name }}</span>
+                    <span class="role">{{ authService.getCurrentUser()?.role }}</span>
+                </div>
+            </div>
+            <button (click)="logout()" class="btn-logout">Log Out</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" [class.full-width]="!showSidebar">
+        <router-outlet></router-outlet>
+    </main>
+</div>

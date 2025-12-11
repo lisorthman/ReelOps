@@ -1,36 +1,60 @@
-<div class="page">
+<div class="page container">
   <div class="page-header">
-    <h2>Projects</h2>
-    <button (click)="goToNewProject()">+ New Project</button>
+    <div class="header-text">
+      <h2>Projects</h2>
+      <p>Manage your active productions</p>
+    </div>
+
+    <div class="header-actions">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search projects..." />
+      </div>
+      <button (click)="goToNewProject()" class="btn btn-primary">
+        <span class="icon">+</span> New Project
+      </button>
+    </div>
   </div>
 
-  <div *ngIf="loading">Loading projects...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div> Loading projects...
+  </div>
 
-  <table *ngIf="!loading && projects.length > 0">
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Status</th>
-        <th>Start</th>
-        <th>End</th>
-        <th>Budget</th>
-        <th>Created By</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let p of projects" (click)="goToDetail(p.id)">
-        <td>{{ p.title }}</td>
-        <td>{{ p.status }}</td>
-        <td>{{ p.start_date || '-' }}</td>
-        <td>{{ p.end_date || '-' }}</td>
-        <td>{{ p.budget_total || '-' }}</td>
-        <td>{{ p.created_by_name || '-' }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <div *ngIf="error" class="error-msg">{{ error }}</div>
 
-  <div *ngIf="!loading && projects.length === 0 && !error">
-    No projects yet. Create your first one!
+  <div *ngIf="!loading && projects.length > 0" class="project-grid">
+    <div *ngFor="let p of projects" class="project-card" (click)="goToDetail(p.id)">
+      <div class="card-header">
+        <span class="badge" [class]="p.status">{{ p.status }}</span>
+        <span class="budget" *ngIf="p.budget_total">${{ p.budget_total | number }}</span>
+      </div>
+
+      <h3>{{ p.title }}</h3>
+
+      <p class="card-description" *ngIf="p.description">{{ p.description }}</p>
+
+      <div class="card-meta">
+        <div class="meta-item" *ngIf="p.directorName">
+          <span class="label">Director</span>
+          <span class="value">{{ p.directorName }}</span>
+        </div>
+        <div class="meta-item" *ngIf="p.castCrewMembers && p.castCrewMembers.length > 0">
+          <span class="label">Team</span>
+          <span class="value">{{ p.castCrewMembers.join(', ') }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="label">Start</span>
+          <span class="value">{{ formatDate(p.start_date) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && projects.length === 0 && !error" class="empty-state">
+    <div class="empty-content">
+      <h3>No projects yet</h3>
+      <p>Start by creating your first production</p>
+      <button (click)="goToNewProject()" class="btn btn-primary">Create Project</button>
+    </div>
   </div>
 </div>

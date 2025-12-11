@@ -1,1 +1,209 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global Design System - Neon Lime */
+:root {
+    /* Core Palette */
+    --color-primary: #E7FE55;
+    /* Neon Lime */
+    --color-secondary: #000000;
+    /* Deep Black */
+    --color-midnight: #050A14;
+    /* Midnight Navy */
+    --color-midnight-light: #1A1A2E;
+    /* Lighter Navy for cards */
+    --color-white: #FFFFFF;
+    --color-light-gray: #F5F5F7;
+    --color-border: #E5E5E5;
+
+    /* Text */
+    --text-primary: #111111;
+    --text-secondary: #666666;
+    --text-on-dark: #FFFFFF;
+
+    /* Spacing & Radius */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-pill: 999px;
+
+    /* Font */
+    --font-family: 'Outfit', sans-serif;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--color-light-gray);
+    color: var(--text-primary);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Base Components */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    gap: 8px;
+
+    .icon {
+        font-size: 1.1rem;
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-secondary);
+    box-shadow: 0 4px 20px rgba(231, 254, 85, 0.3);
+
+    &:hover {
+        background-color: #f0ff80;
+        box-shadow: 0 8px 30px rgba(231, 254, 85, 0.5);
+    }
+
+    &:disabled {
+        background-color: rgba(231, 254, 85, 0.5);
+    }
+}
+
+.btn-secondary {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-white);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(12px);
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-white);
+    backdrop-filter: blur(12px);
+
+    &:hover {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+        box-shadow: 0 0 20px rgba(231, 254, 85, 0.2);
+    }
+}
+
+.btn-success {
+    background-color: rgba(25, 135, 84, 0.2);
+    color: #66d9a3;
+    border: 1px solid rgba(25, 135, 84, 0.4);
+    backdrop-filter: blur(12px);
+
+    &:hover {
+        background-color: rgba(25, 135, 84, 0.3);
+        box-shadow: 0 4px 20px rgba(25, 135, 84, 0.3);
+    }
+}
+
+.btn-danger {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #ff6b6b;
+    border: 1px solid rgba(220, 53, 69, 0.4);
+    backdrop-filter: blur(12px);
+    padding: 6px 12px;
+    font-size: 0.85rem;
+
+    &:hover {
+        background-color: rgba(220, 53, 69, 0.3);
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.3);
+    }
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+/* Cards */
+.card {
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+/* Inputs */
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-family);
+    font-size: 1rem;
+    background: var(--color-white);
+    transition: border-color 0.2s;
+    background-color: #FAFAFA;
+
+    &:focus {
+        outline: none;
+        border-color: var(--color-secondary);
+        background-color: var(--color-white);
+    }
+}
+
+/* Labels */
+label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 0;
+    color: var(--text-primary);
+    font-weight: 700;
+}

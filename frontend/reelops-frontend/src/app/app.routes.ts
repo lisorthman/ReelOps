@@ -10,7 +10,7 @@ export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' }, // temporary
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  
+
   // Protected project routes
   {
     path: 'projects',
@@ -31,5 +31,5 @@ export const routes: Routes = [
   // Default route
   { path: '', redirectTo: 'projects', pathMatch: 'full' },
   { path: '**', redirectTo: 'projects' },
-  
+
 ];

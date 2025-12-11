@@ -1,24 +1,31 @@
 import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { ProjectsService } from '../projects.service';
 import { Project } from '../../shared/models/project.model';
+import { CastCrewService, CastCrewMember } from '../../services/cast-crew';
+
+interface ProjectWithDirector extends Project {
+  directorName?: string;
+  castCrewMembers?: string[]; // Array of cast/crew member names
+}
 
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './project-list.component.html',
   styleUrl: './project-list.component.scss',
 })
 export class ProjectListComponent implements OnInit {
-  projects: Project[] = [];
+  projects: ProjectWithDirector[] = [];
   loading = false;
   error: string | null = null;
 
   constructor(
     private projectsService: ProjectsService,
+    private castCrewService: CastCrewService,
     private router: Router,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
@@ -43,16 +50,59 @@ export class ProjectListComponent implements OnInit {
         console.log('✅ projects from API:', projects);
         // Handle case where backend might return null or non-array
         this.projects = Array.isArray(projects) ? projects : [];
+        
+        // Fetch director info for each project
+        this.projects.forEach((project, index) => {
+          if (project.id) {
+            this.loadDirectorForProject(project.id, index);
+          }
+        });
+        
         this.loading = false;
-        this.cdr.detectChanges(); // Manually trigger change detection
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('❌ Error from getProjects:', err);
         this.error = err.error?.message || 'Failed to load projects';
         this.loading = false;
-        this.cdr.detectChanges(); // Manually trigger change detection
+        this.cdr.detectChanges();
       },
     });
+  }
+
+  loadDirectorForProject(projectId: number, index: number) {
+    this.castCrewService.getMembers(projectId).subscribe({
+      next: (members: CastCrewMember[]) => {
+        // Find director (position contains "Director" or "director")
+        const director = members.find(m => 
+          m.position && m.position.toLowerCase().includes('director')
+        );
+        if (director && director.name) {
+          this.projects[index].directorName = director.name;
+        }
+        
+        // Store cast/crew member names (limit to first 3 for display)
+        if (members.length > 0) {
+          this.projects[index].castCrewMembers = members
+            .slice(0, 3)
+            .map(m => m.name || '')
+            .filter(name => name.length > 0);
+        }
+        
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        // Silently fail - director info is optional
+        console.log('Could not load director for project', projectId);
+      }
+    });
+  }
+
+  formatDate(dateString: string | undefined): string {
+    if (!dateString) return 'TBD';
+    // Extract just the date part (YYYY-MM-DD) if it includes time
+    const dateOnly = dateString.split('T')[0];
+    return dateOnly;
   }
 
   goToNewProject() {

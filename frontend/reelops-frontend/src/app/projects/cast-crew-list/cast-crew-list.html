@@ -1,8 +1,9 @@
 <div class="cast-crew-container">
     <div class="header">
-        <h3>Team (Cast & Crew)</h3>
-        <button type="button" *ngIf="canManage" (click)="showAddForm = !showAddForm" class="btn-primary">
-            {{ showAddForm ? 'Cancel' : 'Add Member' }}
+        <h3>Cast & Crew</h3>
+        <button type="button" *ngIf="canManage" (click)="showAddForm = !showAddForm" class="btn-add-team">
+            <span class="btn-icon">+</span>
+            {{ showAddForm ? 'Cancel' : 'Add Cast/Crew' }}
         </button>
     </div>
 
@@ -10,7 +11,7 @@
 
     <!-- Add Member Form -->
     <div *ngIf="showAddForm" class="add-form-card">
-        <h4>Add New Member</h4>
+        <h4>Add New Cast/Crew</h4>
         <div class="form-group">
             <label>User Email (Must be registered)</label>
             <input [(ngModel)]="newMember.email" type="email" placeholder="email@example.com" />
@@ -44,12 +45,17 @@
         <button type="button" (click)="addMember()" class="btn-success">Add to Project</button>
     </div>
 
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div> Loading cast/crew...
+    </div>
+
     <!-- Members List -->
-    <div class="table-responsive">
+    <div class="table-responsive" *ngIf="!isLoading">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th>Cast/Crew</th>
                     <th>Role</th>
                     <th>Position</th>
                     <th *ngIf="canManage">Rate</th> <!-- Only producers see rates -->
@@ -78,7 +84,7 @@
                     </td>
                 </tr>
                 <tr *ngIf="members.length === 0 && !isLoading">
-                    <td colspan="6" class="text-center">No team members added yet.</td>
+                    <td [attr.colspan]="canManage ? 6 : 5" class="text-center">No cast/crew added yet.</td>
                 </tr>
             </tbody>
         </table>
