@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import pool from './db';
 import authRoutes from './routes/auth';
 import projectsRoutes from './routes/projects';
+import castCrewRoutes from './routes/castCrew';
 
 dotenv.config();
 
@@ -30,10 +31,12 @@ app.get('/health', async (_req, res) => {
   }
 });
 
-// Mount auth routes
+// Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectsRoutes);
+app.use('/api', castCrewRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+

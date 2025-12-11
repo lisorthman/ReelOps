@@ -54,8 +54,29 @@ router.get(
           ORDER BY p.created_at DESC
         `;
         params = [user.userId];
+      } else if (user.role === 'crew') {
+        // ✅ Crew: only projects they are assigned to
+        query = `
+          SELECT
+            p.id,
+            p.title,
+            p.description,
+            p.status,
+            p.start_date,
+            p.end_date,
+            p.budget_total,
+            p.created_at,
+            u.name AS created_by_name,
+            u.id AS created_by_id
+          FROM projects p
+          LEFT JOIN users u ON p.created_by = u.id
+          INNER JOIN cast_crew cc ON p.id = cc.project_id
+          WHERE cc.user_id = $1
+          ORDER BY p.created_at DESC
+        `;
+        params = [user.userId];
       } else {
-        // ✅ Admin (and maybe crew): can see all projects
+        // ✅ Admin: can see all projects
         query = `
           SELECT
             p.id,
@@ -125,6 +146,17 @@ router.get(
       // ✅ If producer, only allow own project
       if (user.role === 'producer' && project.created_by !== user.userId) {
         return res.status(403).json({ message: 'You are not allowed to view this project' });
+      }
+
+      // ✅ If crew, ensure they are assigned to this project
+      if (user.role === 'crew') {
+        const assignment = await pool.query(
+          'SELECT id FROM cast_crew WHERE project_id = $1 AND user_id = $2',
+          [id, user.userId]
+        );
+        if (assignment.rows.length === 0) {
+          return res.status(403).json({ message: 'You are not assigned to this project' });
+        }
       }
 
       res.json(project);
@@ -215,11 +247,18 @@ router.put(
       }
 
       // Check if project exists
-      const existing = await pool.query('SELECT id FROM projects WHERE id = $1', [
+      const existing = await pool.query('SELECT id, created_by FROM projects WHERE id = $1', [
         id,
       ]);
       if (existing.rows.length === 0) {
         return res.status(404).json({ message: 'Project not found' });
+      }
+
+      // ✅ Check ownership if producer
+      if (req.user!.role === 'producer') {
+        if (existing.rows[0].created_by !== req.user!.userId) {
+          return res.status(403).json({ message: 'You are not allowed to edit this project' });
+        }
       }
 
       const result = await pool.query(
