@@ -1,0 +1,38 @@
+<div class="add-member">
+  <h4>Add Member</h4>
+
+  <div class="search">
+    <input type="text" [(ngModel)]="searchQuery" placeholder="Search users by name or email" />
+    <button (click)="searchUsers()">Search</button>
+    <div *ngIf="searching">Searching...</div>
+    <ul *ngIf="searchResults.length">
+      <li *ngFor="let u of searchResults">
+        <button (click)="pickUser(u)">{{ u.name }} — {{ u.email }}</button>
+      </li>
+    </ul>
+  </div>
+
+  <div class="form">
+    <label>Selected user email</label>
+    <input type="text" [(ngModel)]="selectedEmail" />
+
+    <label>Role</label>
+    <select [(ngModel)]="role_type">
+      <option value="cast">Cast</option>
+      <option value="crew">Crew</option>
+    </select>
+
+    <label>Position</label>
+    <input type="text" [(ngModel)]="position" />
+
+    <label>Daily rate</label>
+    <input type="number" [(ngModel)]="daily_rate" min="0" />
+
+    <label>Notes</label>
+    <textarea [(ngModel)]="notes"></textarea>
+
+    <button (click)="submit()">Add Member</button>
+  </div>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+</div>

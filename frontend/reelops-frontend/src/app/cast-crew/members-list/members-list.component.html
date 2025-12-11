@@ -1,0 +1,36 @@
+<div class="members">
+  <h3>Cast & Crew</h3>
+
+  <div *ngIf="loading">Loading members...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <table *ngIf="!loading && members.length > 0">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Position</th>
+        <th>Rate</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let m of members">
+        <td>{{ m.name || '-' }}</td>
+        <td>{{ m.email }}</td>
+        <td>{{ m.role_type }}</td>
+        <td>{{ m.position || '-' }}</td>
+        <td>{{ m.daily_rate ?? '-' }}</td>
+        <td>
+          <button (click)="onEdit(m)">Edit</button>
+          <button (click)="onRemove(m)">Remove</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && members.length === 0">
+    No members yet.
+  </div>
+</div>

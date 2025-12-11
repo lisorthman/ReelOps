@@ -1,14 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectsService } from '../projects.service';
 import { Project, ProjectStatus } from '../../shared/models/project.model';
+import { CastCrewList } from '../cast-crew-list/cast-crew-list';
 
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CastCrewList],
   templateUrl: './project-detail.component.html',
   styleUrl: './project-detail.component.scss',
 })
@@ -26,6 +27,7 @@ export class ProjectDetailComponent implements OnInit {
   saving = false;
   error: string | null = null;
   isEditMode = false;
+  isBrowser: boolean;
 
   statuses: ProjectStatus[] = [
     'planning',
@@ -38,15 +40,21 @@ export class ProjectDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private projectsService: ProjectsService
-  ) {}
+    private projectsService: ProjectsService,
+    private cd: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.projectId = Number(idParam);
       this.isEditMode = true;
-      this.loadProject(this.projectId);
+      if (this.isBrowser) {
+        this.loadProject(this.projectId);
+      }
     }
   }
 
@@ -58,11 +66,13 @@ export class ProjectDetailComponent implements OnInit {
       next: (project) => {
         this.project = project;
         this.loading = false;
+        this.cd.detectChanges();
       },
       error: (err) => {
         console.error(err);
         this.error = err.error?.message || 'Failed to load project';
         this.loading = false;
+        this.cd.detectChanges();
       },
     });
   }
